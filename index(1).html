@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Duel Perkalian &amp; Pembagian - Kelas 7 SMP</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;color:#222;padding:16px}
+  .wrap{max-width:860px;margin:0 auto}
+  .card{background:#fff;border-radius:20px;padding:24px;box-shadow:0 12px 32px rgba(0,0,0,.22);margin-bottom:16px}
+  h1{font-size:1.6rem;text-align:center;color:#3b2f7a;line-height:1.3}
+  .sub{text-align:center;color:#666;margin:8px 0 18px;font-size:.97rem;line-height:1.55}
+  .label{font-weight:700;color:#3b2f7a;margin:16px 0 8px}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .pick{flex:1;min-width:130px;border:2.5px solid #ddd;background:#f8f8ff;border-radius:14px;padding:12px 10px;cursor:pointer;text-align:center;font-size:1rem;font-weight:600;transition:.15s}
+  .pick small{display:block;font-weight:400;color:#666;font-size:.79rem;margin-top:4px}
+  .pick:hover{border-color:#667eea;transform:translateY(-1px)}
+  .pick.active{border-color:#667eea;background:#eef0ff;color:#3b2f7a;box-shadow:0 4px 12px rgba(102,126,234,.25)}
+  .names{display:flex;gap:10px;flex-wrap:wrap}
+  .namebox{flex:1;min-width:150px}
+  .namebox input{width:100%;border:2.5px solid #ddd;border-radius:12px;padding:12px;font-size:1rem;font-weight:600;text-align:center}
+  .namebox input:focus{outline:none;border-color:#667eea}
+  .namebox.p1 input{border-color:#93c5fd;background:#eff6ff}
+  .namebox.p2 input{border-color:#fca5a5;background:#fef2f2}
+  .btn{display:block;width:100%;border:none;border-radius:14px;padding:15px;font-size:1.1rem;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;margin-top:20px;transition:.15s}
+  .btn:hover{opacity:.93;transform:translateY(-1px)}
+  .btn.secondary{background:#eef0ff;color:#3b2f7a}
+  .note{background:#eef0ff;border-radius:12px;padding:12px 14px;font-size:.93rem;line-height:1.65;color:#3b2f7a}
+  .vs-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .fighter{flex:1;border-radius:14px;padding:12px;text-align:center;color:#fff}
+  .fighter.p1{background:linear-gradient(135deg,#2563eb,#3b82f6)}
+  .fighter.p2{background:linear-gradient(135deg,#dc2626,#f97316)}
+  .fighter .fname{font-weight:800;font-size:1.02rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .fighter .fscore{font-size:1.25rem;font-weight:800;line-height:1.25}
+  .fighter .flabel{font-size:.78rem;opacity:.92}
+  .vs{font-weight:900;color:#3b2f7a;font-size:1.2rem}
+  .race-row{display:flex;align-items:center;gap:8px;margin-top:7px;font-size:.8rem;font-weight:700}
+  .race-row .rname{width:86px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .track{flex:1;height:13px;background:#eee;border-radius:99px;overflow:hidden}
+  .fill{height:100%;border-radius:99px;transition:width .4s}
+  .fill.p1{background:#3b82f6}.fill.p2{background:#f97316}
+  .meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-weight:600;color:#666;font-size:.9rem;margin-top:10px}
+  .grace{background:#fff7ed;border:2px solid #f97316;color:#9a3412;border-radius:12px;padding:11px 14px;margin-top:12px;text-align:center;font-weight:800;font-size:1rem}
+  .meta b{color:#3b2f7a}
+  .duel{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  .panel{border-radius:16px;padding:16px 14px;border:2.5px solid #ddd}
+  .panel.p1{border-color:#93c5fd;background:#f5f9ff}
+  .panel.p2{border-color:#fca5a5;background:#fff7f5}
+  .panel .pname{text-align:center;font-weight:800;font-size:1.02rem;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .panel .pprogress{text-align:center;font-size:.85rem;font-weight:700;color:#666;margin-top:3px}
+  .panel .pquestion{text-align:center;font-size:2.15rem;font-weight:800;color:#222;padding:16px 4px 14px;letter-spacing:.5px}
+  .answers{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ans{border:2.5px solid #ddd;background:#fff;border-radius:12px;padding:14px 6px;font-size:1.3rem;font-weight:700;cursor:pointer;transition:.12s}
+  .ans:hover:not(:disabled){transform:translateY(-1px);border-color:#667eea}
+  .ans.correct{border-color:#38c172;background:#e6ffed;color:#1d6b3c}
+  .ans.wrong{border-color:#e3342f;background:#ffecec;color:#8b1a1a;opacity:.75}
+  .ans:disabled{cursor:default}
+  .pfeed{text-align:center;font-size:.88rem;font-weight:700;min-height:22px;margin-top:9px}
+  .pfeed.ok{color:#1d6b3c}.pfeed.no{color:#b91c1c}
+  .winner-big{text-align:center;font-size:1.55rem;font-weight:800;color:#3b2f7a;line-height:1.4;margin:10px 0 4px}
+  .final-vs{display:flex;gap:10px;margin-top:14px}
+  .final-box{flex:1;border-radius:14px;padding:16px 10px;text-align:center;color:#fff}
+  .final-box.p1{background:linear-gradient(135deg,#2563eb,#3b82f6)}
+  .final-box.p2{background:linear-gradient(135deg,#dc2626,#f97316)}
+  .final-box .fs{font-size:1.7rem;font-weight:800;line-height:1.3}
+  .review-item{border-bottom:1px solid #eee;padding:9px 2px;font-size:.92rem;line-height:1.55}
+  .review-item:last-child{border-bottom:none}
+  textarea.roster{width:100%;min-height:110px;border:2.5px solid #ddd;border-radius:12px;padding:12px;font-size:.98rem;font-family:inherit;line-height:1.55;resize:vertical}
+  textarea.roster:focus{outline:none;border-color:#667eea}
+  .draw-stage{font-size:2rem;font-weight:800;text-align:center;padding:24px 10px;border:3px dashed #a5b4fc;border-radius:16px;background:#eef2ff;color:#3730a3;min-height:98px;display:flex;align-items:center;justify-content:center;line-height:1.3;word-break:break-word}
+  .draw-stage.spinning{border-color:#f97316;background:#fff7ed;color:#9a3412}
+  .draw-stage.winner{border-style:solid;border-color:#22c55e;background:#f0fdf4;color:#166534}
+  .spinrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .spinrow .btn{margin-top:0;flex:1;min-width:150px}
+  .spinrow .btn.p2{background:linear-gradient(135deg,#dc2626,#f97316)}
+  .tmsg{font-size:.9rem;margin-top:8px;font-weight:600;min-height:20px}
+  .tmsg.err{color:#b91c1c}.tmsg.ok{color:#166534}
+  .bracket-wrap{display:flex;gap:12px;overflow-x:auto;padding:6px 2px 12px;align-items:stretch}
+  .bcol{min-width:178px;flex:1;display:flex;flex-direction:column}
+  .bcol h3{text-align:center;color:#3b2f7a;font-size:.98rem;margin-bottom:10px}
+  .bcol .matches{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:10px}
+  .bcol .match{margin-bottom:0}
+  .bcol.center{min-width:200px}
+  .bcol.center .matches{justify-content:center}
+  .trophy-big{font-size:3.4rem;text-align:center;line-height:1.15}
+  .match{border:2px solid #e5e7eb;border-radius:12px;padding:10px 12px;margin-bottom:12px;background:#f9fafb}
+  .match.done{border-color:#86efac;background:#f0fdf4}
+  .match.playable{border-color:#f97316;background:#fff7ed;box-shadow:0 4px 14px rgba(249,115,22,.18)}
+  .match .mtitle{font-size:.75rem;font-weight:800;color:#888;text-align:center;margin-bottom:6px}
+  .match .mrow{padding:5px 7px;border-radius:7px;font-weight:600;display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .match .mrow.win{background:#dcfce7;color:#166534;font-weight:800}
+  .match .mrow.tbd{color:#999;font-weight:500;font-style:italic}
+  .match .mstatus{font-size:.78rem;color:#666;margin-top:6px;text-align:center;font-weight:700}
+  .match .mbtn{margin-top:8px;width:100%;border:none;border-radius:9px;padding:9px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:700;cursor:pointer;font-size:.95rem}
+  .champ{background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;text-align:center;border-radius:14px;padding:16px;font-size:1.25rem;font-weight:800;margin-bottom:14px;line-height:1.45}
+  .hidden{display:none}
+  @media(max-width:620px){
+    .card{padding:16px}
+    .duel{grid-template-columns:1fr}
+    .panel .pquestion{font-size:1.95rem;padding:12px 4px 10px}
+    .ans{font-size:1.15rem;padding:12px 4px}
+    .fighter .fscore{font-size:1.1rem}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- LAYAR AWAL -->
+  <div class="card" id="screen-start">
+    <h1>⚔️ Duel Perkalian &amp; Pembagian ⚔️</h1>
+    <p class="sub">Duel 2 siswa dengan <b>soal yang sama</b>, tapi jalan <b>masing-masing</b>.<br>
+    Semua soal bilangan <b>positif</b> &bull; <b>tanpa batas waktu</b> per soal &bull; Mudah &amp; Sedang <b>10 soal</b>, Sulit <b>5 soal</b></p>
+
+    <div class="label">Nama Pemain</div>
+    <div class="names">
+      <div class="namebox p1"><input id="name1" type="text" maxlength="30" value="Siswa 1" aria-label="Nama Siswa 1"></div>
+      <div class="namebox p2"><input id="name2" type="text" maxlength="30" value="Siswa 2" aria-label="Nama Siswa 2"></div>
+    </div>
+
+    <div class="label">1. Pilih Mode</div>
+    <div class="row" id="mode-row">
+      <button class="pick" data-mode="perkalian">✖️ Perkalian<small>khusus kali</small></button>
+      <button class="pick" data-mode="pembagian">➗ Pembagian<small>khusus bagi</small></button>
+      <button class="pick active" data-mode="campuran">🔀 Campuran<small>kali &amp; bagi acak</small></button>
+    </div>
+
+    <div class="label">2. Pilih Level</div>
+    <div class="row" id="level-row">
+      <button class="pick active" data-level="mudah">🟢 Mudah<small>puluhan &times; satuan &bull; bagi satuan, hasil puluhan &bull; 10 soal</small></button>
+      <button class="pick" data-level="sedang">🟡 Sedang<small>puluhan &times; puluhan &bull; bagi satuan, hasil ratusan &bull; 10 soal</small></button>
+      <button class="pick" data-level="sulit">🔴 Sulit<small>ratusan (&lt;500) &times; puluhan &bull; pembagi 11&ndash;15, hasil puluhan &bull; 5 soal</small></button>
+    </div>
+
+    <div class="label">Cara Main</div>
+    <div class="note">
+      1. Kedua siswa mendapat <b>soal-soal yang sama</b> (Mudah &amp; Sedang 10 soal, Sulit 5 soal), tapi <b>urutannya berbeda</b> untuk tiap pemain. Soal yang jadi nomor 1 untuk Pemain 1 bisa jadi nomor 7 untuk Pemain 2.<br>
+      2. Menjawab <b>benar</b> = langsung lanjut ke soal berikutnya di panel sendiri. Pemain 1 bisa sudah di soal 5 sementara Pemain 2 masih di soal 2 — tidak apa-apa, memang begitu duelnya.<br>
+      3. Menjawab <b>salah</b> = masih boleh mencoba lagi di soal yang sama, tapi <b>batasnya 2 kali salah</b>. Sesudah salah yang ke-2, soal itu otomatis dilewati dan lanjut ke soal berikutnya. Pilihan yang sudah salah akan terkunci.<br>
+      4. Kalau satu pemain sudah menyelesaikan semua soal, permainan <b>belum selesai</b>: pemain satunya dapat <b>waktu tambahan 120 detik</b> untuk menyelesaikan soal-soal sisanya.<br>
+      5. <b>Pemenangnya adalah yang jawaban benarnya paling banyak.</b> Kalau jumlah jawaban benarnya sama, yang menang adalah yang menyelesaikan semua soal lebih dulu.
+    </div>
+
+    <button class="btn" id="btn-start">▶️ Mulai Duel</button>
+  </div>
+
+  <!-- KARTU UNDIAN NAMA -->
+  <div class="card" id="card-draw">
+    <h1>🎡 Undian Nama Pemain</h1>
+    <p class="sub">Tempel daftar nama siswa, lalu putar undiannya — nama-nama akan <b>berputar di layar</b>, makin lama makin lambat, sampai berhenti di satu nama. Putar sekali untuk Pemain 1, sekali lagi untuk Pemain 2.</p>
+
+    <div class="label">Daftar Nama Siswa (satu nama per baris)</div>
+    <textarea class="roster" id="roster" placeholder="Contoh:&#10;Andi&#10;Budi&#10;Citra&#10;Dedi&#10;Eka"></textarea>
+    <div class="tmsg" id="roster-count"></div>
+
+    <div class="draw-stage" id="draw-stage">Siapa yang akan maju berduel? 🎲</div>
+    <div class="spinrow">
+      <button class="btn" id="btn-spin1">🎡 Putar — Pemain 1 🔵</button>
+      <button class="btn p2" id="btn-spin2">🎡 Putar — Pemain 2 🔴</button>
+    </div>
+    <div class="note" id="draw-info" style="margin-top:14px">🔵 Pemain 1: — &nbsp;•&nbsp; 🔴 Pemain 2: —</div>
+    <button class="btn hidden" id="btn-draw-duel">▶️ Mulai Duel dengan 2 Nama Ini</button>
+    <button class="btn secondary" id="btn-draw-reset">↺ Reset Undian (semua siswa bisa terpilih lagi)</button>
+    <div class="tmsg" id="draw-msg"></div>
+  </div>
+
+  <!-- KARTU TURNAMEN KELAS -->
+  <div class="card" id="card-tournament">
+    <h1>🏆 Turnamen Kelas</h1>
+    <p class="sub">Klik tombolnya untuk membuka bagan kosong, lalu <b>undi nama siswa satu per satu</b> pakai putaran nama — setiap nama yang terundi langsung masuk ke tempatnya di bagan, sampai semua siswa terundi (yang dapat <b>bye</b> lolos langsung). Sesudah undian selesai, bagan menunjukkan siapa melawan siapa dan duel tinggal dimainkan. Pemenang tiap duel maju ke babak berikutnya sampai tersisa <b>1 juara</b>.<br>Turnamen memakai <b>Mode &amp; Level</b> yang dipilih di kartu paling atas.</p>
+
+    <button class="btn" id="btn-create-tournament" style="margin-top:8px">🎡 Mulai Undian &amp; Buat Bagan Turnamen</button>
+    <div class="tmsg" id="tournament-msg"></div>
+    <div id="tournament-status" class="hidden">
+      <div class="note" id="tournament-status-text" style="margin-top:12px"></div>
+      <button class="btn secondary" id="btn-open-bracket">🗂️ Lihat Bagan Turnamen</button>
+    </div>
+  </div>
+
+  <!-- LAYAR BAGAN TURNAMEN -->
+  <div class="card hidden" id="screen-bracket">
+    <h1>🗂️ Bagan Turnamen</h1>
+    <p class="sub" id="bracket-sub">Sistem gugur — pemenang maju ke babak berikutnya.</p>
+    <div class="champ hidden" id="champ-banner"></div>
+    <div id="ceremony-panel" class="hidden" style="border:2px dashed #a5b4fc;border-radius:16px;padding:16px;margin-bottom:16px;background:#f5f7ff">
+      <div style="font-weight:800;color:#3730a3;font-size:1.05rem;text-align:center">🎡 Undian Penempatan Bagan</div>
+      <p class="sub" id="ceremony-label" style="text-align:center;margin-top:6px"></p>
+      <div class="draw-stage" id="draw-stage2">🎡 Klik tombol Putar untuk mengundi nama berikutnya</div>
+      <button class="btn" id="btn-spin-slot">🎡 Putar Undian</button>
+      <div class="tmsg" id="ceremony-progress" style="text-align:center"></div>
+    </div>
+    <div class="bracket-wrap" id="bracket-wrap"></div>
+    <button class="btn" id="btn-next-match">▶️ Mainkan Pertandingan Berikutnya</button>
+    <button class="btn secondary" id="btn-bracket-home">🏠 Kembali ke Layar Awal</button>
+  </div>
+
+  <!-- LAYAR GAME -->
+  <div class="card hidden" id="screen-game">
+    <div class="vs-head">
+      <div class="fighter p1"><div class="fname" id="head-name1">Siswa 1</div><div class="fscore" id="prog1">Soal 1 / 10</div><div class="flabel" id="done1">0 soal selesai</div></div>
+      <div class="vs">VS</div>
+      <div class="fighter p2"><div class="fname" id="head-name2">Siswa 2</div><div class="fscore" id="prog2">Soal 1 / 10</div><div class="flabel" id="done2">0 soal selesai</div></div>
+    </div>
+    <div class="race-row"><span class="rname" id="race-name1">Siswa 1</span><div class="track"><div class="fill p1" id="race1" style="width:0%"></div></div><span id="race-num1">0/10</span></div>
+    <div class="race-row"><span class="rname" id="race-name2">Siswa 2</span><div class="track"><div class="fill p2" id="race2" style="width:0%"></div></div><span id="race-num2">0/10</span></div>
+    <div class="meta"><div>🏁 Unggul: <b id="leader">—</b></div><div>Waktu berjalan (tanpa batas): <b id="elapsed">00:00</b></div></div>
+    <div class="grace hidden" id="grace-banner"></div>
+
+    <div class="duel">
+      <div class="panel p1" id="panel1">
+        <div class="pname" id="panel-name1">🔵 Siswa 1</div>
+        <div class="pprogress" id="panel-prog1">Soal 1 dari 10</div>
+        <div class="pquestion" id="q1">...</div>
+        <div class="answers" id="answers1"></div>
+        <div class="pfeed" id="feed1"></div>
+      </div>
+      <div class="panel p2" id="panel2">
+        <div class="pname" id="panel-name2">🔴 Siswa 2</div>
+        <div class="pprogress" id="panel-prog2">Soal 1 dari 10</div>
+        <div class="pquestion" id="q2">...</div>
+        <div class="answers" id="answers2"></div>
+        <div class="pfeed" id="feed2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LAYAR HASIL -->
+  <div class="card hidden" id="screen-result">
+    <h1>🏆 Duel Selesai!</h1>
+    <div class="winner-big" id="winner-text">🎉 Pemenang!</div>
+    <p class="sub" id="result-sub"></p>
+    <div class="final-vs">
+      <div class="final-box p1"><div id="final-name1">Siswa 1</div><div class="fs" id="final-prog1">10 / 10 soal</div><div style="font-size:.88rem;opacity:.93" id="final-stat1"></div></div>
+      <div class="final-box p2"><div id="final-name2">Siswa 2</div><div class="fs" id="final-prog2">0 / 10 soal</div><div style="font-size:.88rem;opacity:.93" id="final-stat2"></div></div>
+    </div>
+    <button class="btn" id="btn-again">🔄 Rematch (Pemain &amp; Level Sama, Soal Baru)</button>
+    <button class="btn hidden" id="btn-bracket">🏆 Kembali ke Bagan Turnamen</button>
+    <button class="btn secondary" id="btn-home">🏠 Ganti Pemain / Level</button>
+    <div class="label" style="margin-top:22px">📝 Kunci Jawaban</div>
+    <div id="review-list"></div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var TOTAL = 10; // diatur ulang di startGame: Mudah & Sedang 10 soal, Sulit 5 soal
+  var selectedMode = "campuran", selectedLevel = "mudah";
+  var state = null, elapsedId = null, elapsedSec = 0, gameOver = false;
+  var GRACE_SECONDS = 120; // waktu tambahan untuk pemain yang belum selesai
+  var graceId = null, graceLeft = 0, firstFinisher = -1;
+  var tournament = null, activeMatch = null; // mode turnamen kelas (undian nama + bagan)
+  var drawPicks = {1: null, 2: null}, drawnSet = [], spinning = false, pairConsumed = false; // putaran undian nama
+
+  function $(id){ return document.getElementById(id); }
+  function show(id){
+    ["screen-start","screen-game","screen-result","screen-bracket"].forEach(function(s){ $(s).classList.toggle("hidden", s!==id); });
+    $("card-tournament").classList.toggle("hidden", id !== "screen-start");
+    $("card-draw").classList.toggle("hidden", id !== "screen-start");
+  }
+  function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+  function shuffle(arr){
+    var a = arr.slice();
+    for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+    return a;
+  }
+  function fmtTime(s){ var m=Math.floor(s/60), d=s%60; return (m<10?"0":"")+m+":"+(d<10?"0":"")+d; }
+
+  function bindPicks(rowId, attr, cb){
+    var row = $(rowId);
+    row.addEventListener("click", function(e){
+      var btn = e.target.closest(".pick"); if(!btn) return;
+      row.querySelectorAll(".pick").forEach(function(p){ p.classList.remove("active"); });
+      btn.classList.add("active"); cb(btn.getAttribute(attr));
+    });
+  }
+  bindPicks("mode-row","data-mode",function(v){ selectedMode=v; });
+  bindPicks("level-row","data-level",function(v){ selectedLevel=v; });
+
+  function fmtNum(n){
+    // Format ribuan ala Indonesia: 4800 -> "4.800"
+    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+
+  function makeQuestion(){
+    var mode = selectedMode;
+    if(mode === "campuran") mode = Math.random() < 0.5 ? "perkalian" : "pembagian";
+    var a, b, answer, op, cands;
+    // Catatan istilah (sesuai contoh MIR: 86, 175, 593):
+    // "puluhan" = bilangan 2 digit (10-99), "ratusan" = bilangan 3 digit (100-999),
+    // "satuan" = 1 digit (2-9). Angkanya acak penuh, jadi TIDAK selalu kelipatan 10.
+    if(selectedLevel === "mudah"){
+      // MUDAH: perkalian = puluhan (10-99) x satuan (2-9)
+      // pembagian = pembagi satuan (2-9), hasilnya puluhan (10-99)
+      if(mode === "perkalian"){
+        a = randInt(10,99); b = randInt(2,9);
+        answer = a * b; op = "×";
+      } else {
+        b = randInt(2,9); var qm = randInt(10,99);
+        a = b * qm; answer = qm; op = "÷";
+      }
+    } else if(selectedLevel === "sedang"){
+      // SEDANG: perkalian = puluhan (10-99) x puluhan (10-99)
+      // pembagian = pembagi satuan (2-9), hasilnya ratusan (100-999)
+      if(mode === "perkalian"){
+        a = randInt(10,99); b = randInt(10,99);
+        answer = a * b; op = "×";
+      } else {
+        b = randInt(2,9); var qs = randInt(100,999);
+        a = b * qs; answer = qs; op = "÷";
+      }
+    } else {
+      // SULIT: perkalian = ratusan di bawah 500 (100-499) x puluhan (10-99)
+      // pembagian = pembagi 11-15, hasilnya puluhan (10-99)
+      if(mode === "perkalian"){
+        a = randInt(100,499); b = randInt(10,99);
+        answer = a * b; op = "×";
+      } else {
+        b = randInt(11,15); var qh = randInt(10,99);
+        a = b * qh; answer = qh; op = "÷";
+      }
+    }
+
+    // Pengecoh: selalu positif dan dekat dengan jawaban benar
+    if(op === "×"){
+      cands = [a*(b+1), a*(b-1), (a+1)*b, (a-1)*b, answer + a, answer - a, answer + b, answer - b];
+    } else {
+      cands = [answer + 1, answer - 1, answer + 2, answer - 2, answer + 10, answer - 10,
+               answer + b, answer - b, answer + 11, answer - 11];
+    }
+    var opts = new Set([answer]);
+    shuffle(cands).forEach(function(c){ if(opts.size < 4 && c > 0 && c !== answer) opts.add(c); });
+    var k = 3;
+    while(opts.size < 4){ if(answer + k !== answer) opts.add(answer + k); k++; }
+    return {a:a, b:b, op:op, answer:answer, options:Array.from(opts),
+            text: fmtNum(a) + " " + op + " " + fmtNum(b) + " = ?"};
+  }
+
+  function newPlayer(name){
+    return {name:name, idx:0, mistakes:0, attempts:0, correct:0, failed:0, seq:[], wrong:[], optOrder:[], busy:false};
+  }
+
+  function startGame(){
+    var n1 = ($("name1").value || "Siswa 1").trim() || "Siswa 1";
+    var n2 = ($("name2").value || "Siswa 2").trim() || "Siswa 2";
+    if(drawPicks[1] === n1 && drawPicks[2] === n2) pairConsumed = true; // pasangan hasil undian ini resmi dimainkan
+    TOTAL = (selectedLevel === "sulit") ? 5 : 10;
+    // SATU rangkaian soal yang sama untuk kedua pemain
+    var questions = [];
+    for(var i=0;i<TOTAL;i++) questions.push(makeQuestion());
+
+    state = { questions:questions, players:[newPlayer(n1), newPlayer(n2)] };
+    gameOver = false;
+    // Set soal SAMA untuk kedua pemain, tapi urutannya diacak BERBEDA untuk tiap pemain
+    state.players.forEach(function(p){ p.seq = shuffle(state.questions); });
+    var guard = 0;
+    while(TOTAL > 1 && guard < 50 &&
+          state.players[0].seq.some(function(q, i){ return q.text === state.players[1].seq[i].text; })){
+      // Acak ulang urutan Pemain 2 sampai tidak ada soal yang jatuh di nomor yang sama dengan Pemain 1
+      state.players[1].seq = shuffle(state.questions); guard++;
+    }
+    state.players.forEach(function(p){ p.optOrder = shuffle(p.seq[0].options); });
+
+    $("head-name1").textContent = n1; $("head-name2").textContent = n2;
+    $("race-name1").textContent = n1; $("race-name2").textContent = n2;
+    $("panel-name1").textContent = "🔵 " + n1; $("panel-name2").textContent = "🔴 " + n2;
+
+    firstFinisher = -1; graceLeft = 0;
+    if(graceId) clearInterval(graceId); graceId = null;
+    $("grace-banner").classList.add("hidden"); $("grace-banner").textContent = "";
+    elapsedSec = 0; $("elapsed").textContent = "00:00";
+    clearInterval(elapsedId);
+    elapsedId = setInterval(function(){ elapsedSec++; $("elapsed").textContent = fmtTime(elapsedSec); }, 1000);
+
+    show("screen-game");
+    renderPlayer(0); renderPlayer(1); renderRace();
+  }
+
+  function renderRace(){
+    var p = state.players;
+    [0,1].forEach(function(i){
+      $("race" + (i+1)).style.width = (p[i].idx / TOTAL * 100) + "%";
+      $("race-num" + (i+1)).textContent = p[i].idx + "/" + TOTAL;
+      $("prog" + (i+1)).textContent = p[i].idx >= TOTAL ? "SELESAI 🏁" : "Soal " + (p[i].idx+1) + " / " + TOTAL;
+      $("done" + (i+1)).textContent = p[i].idx + " soal selesai • " + p[i].correct + " benar";
+    });
+    $("leader").textContent =
+      p[0].idx === p[1].idx ? "imbang — sama-sama " + p[0].idx + " soal" :
+      (p[0].idx > p[1].idx ? p[0].name : p[1].name) + " (unggul " + Math.abs(p[0].idx - p[1].idx) + " soal)";
+  }
+
+  function renderPlayer(pl){
+    var p = state.players[pl];
+    if(p.idx >= TOTAL) return;
+    var q = p.seq[p.idx];
+    $("panel-prog" + (pl+1)).textContent = "Soal " + (p.idx+1) + " dari " + TOTAL;
+    $("q" + (pl+1)).textContent = q.text;
+    var feed = $("feed" + (pl+1)); feed.textContent = ""; feed.className = "pfeed";
+    var box = $("answers" + (pl+1)); box.innerHTML = "";
+    p.optOrder.forEach(function(opt){
+      var btn = document.createElement("button");
+      btn.className = "ans"; btn.textContent = fmtNum(opt);
+      if(p.wrong.indexOf(opt) >= 0){ btn.classList.add("wrong"); btn.disabled = true; }
+      btn.addEventListener("click", function(){ answer(pl, opt, btn); });
+      box.appendChild(btn);
+    });
+  }
+
+  function advancePlayer(pl){
+    // Pemain ini maju satu nomor di urutannya sendiri
+    var p = state.players[pl];
+    p.idx++;
+    p.wrong = [];
+    if(p.idx >= TOTAL){ onPlayerFinished(pl); return; }
+    p.optOrder = shuffle(p.seq[p.idx].options);
+    p.busy = false;
+    renderPlayer(pl); renderRace();
+  }
+
+  function showFinishedPanel(pl){
+    var p = state.players[pl];
+    $("panel-prog" + (pl+1)).textContent = "SELESAI 🏁";
+    $("q" + (pl+1)).textContent = "🏁";
+    $("answers" + (pl+1)).innerHTML = "";
+    var feed = $("feed" + (pl+1));
+    feed.textContent = "✅ " + p.name + " sudah menyelesaikan semua soal — menunggu lawan.";
+    feed.className = "pfeed ok";
+  }
+
+  function updateGraceBanner(){
+    var other = state.players[1 - firstFinisher];
+    $("grace-banner").textContent = "⏳ Waktu tambahan untuk " + other.name +
+      " menyelesaikan soal-soal sisanya: " + fmtTime(graceLeft);
+  }
+
+  function onPlayerFinished(pl){
+    var p = state.players[pl];
+    p.busy = true;
+    renderRace();
+    if(firstFinisher === -1){
+      // Pemain pertama yang selesai: permainan TIDAK langsung berakhir.
+      // Lawannya dapat waktu tambahan 120 detik untuk menyelesaikan sisanya.
+      firstFinisher = pl;
+      showFinishedPanel(pl);
+      graceLeft = GRACE_SECONDS;
+      $("grace-banner").classList.remove("hidden");
+      updateGraceBanner();
+      graceId = setInterval(function(){
+        graceLeft--;
+        if(graceLeft <= 0){
+          clearInterval(graceId); graceId = null;
+          finishGame();
+          return;
+        }
+        updateGraceBanner();
+      }, 1000);
+    } else {
+      // Pemain kedua selesai di dalam masa waktu tambahan
+      finishGame();
+    }
+  }
+
+  function answer(pl, val, btn){
+    if(gameOver) return;
+    var p = state.players[pl];
+    if(p.busy || p.idx >= TOTAL || p.wrong.indexOf(val) >= 0) return;
+    var q = p.seq[p.idx];
+    p.attempts++;
+
+    if(val === q.answer){
+      // Benar: pemain INI saja yang maju ke soal berikutnya
+      p.correct++;
+      p.busy = true;
+      btn.classList.add("correct");
+      $("answers" + (pl+1)).querySelectorAll(".ans").forEach(function(b){ b.disabled = true; });
+      var feed = $("feed" + (pl+1));
+      feed.textContent = "✅ Benar! Lanjut ke soal berikutnya..."; feed.className = "pfeed ok";
+      setTimeout(function(){ if(!gameOver) advancePlayer(pl); }, 550);
+    } else {
+      // Salah: pilihan ini terkunci. Batasnya 2 kali salah per soal —
+      // sesudah salah ke-2, soal otomatis lanjut ke nomor berikutnya.
+      p.mistakes++;
+      p.wrong.push(val);
+      btn.classList.add("wrong"); btn.disabled = true;
+      var feed2 = $("feed" + (pl+1));
+      if(p.wrong.length >= 2){
+        p.busy = true;
+        p.failed++;
+        $("answers" + (pl+1)).querySelectorAll(".ans").forEach(function(b){
+          b.disabled = true;
+          if(parseInt(b.textContent.replace(/\./g, ""), 10) === q.answer) b.classList.add("correct");
+        });
+        feed2.textContent = "❌ Sudah 2 kali salah — soal ini dilewati, lanjut ke soal berikutnya..."; feed2.className = "pfeed no";
+        setTimeout(function(){ if(!gameOver) advancePlayer(pl); }, 1000);
+      } else {
+        feed2.textContent = "❌ Salah (1 dari 2) — masih ada 1 kesempatan lagi di soal ini"; feed2.className = "pfeed no";
+      }
+    }
+  }
+
+  function finishGame(){
+    if(gameOver) return;
+    gameOver = true;
+    clearInterval(elapsedId);
+    if(graceId) clearInterval(graceId); graceId = null;
+    $("grace-banner").classList.add("hidden");
+    renderRace();
+    show("screen-result");
+    // Pemenang: jawaban benar TERBANYAK. Kalau sama, yang selesai lebih dulu yang menang.
+    var p = state.players, winnerIdx, tie = (p[0].correct === p[1].correct);
+    if(!tie) winnerIdx = (p[0].correct > p[1].correct) ? 0 : 1;
+    else winnerIdx = (firstFinisher >= 0) ? firstFinisher : 0;
+    var w = p[winnerIdx], l = p[1 - winnerIdx];
+    // Kalau duel ini bagian dari turnamen: catat pemenangnya ke bagan & majukan ke babak berikutnya
+    var wasTournamentMatch = !!activeMatch;
+    if(activeMatch){
+      var mm = tournament.rounds[activeMatch.r][activeMatch.m];
+      mm.winner = w.name;
+      advanceWinner(tournament, activeMatch.r, activeMatch.m);
+      activeMatch = null;
+    }
+    $("btn-again").classList.toggle("hidden", wasTournamentMatch);
+    $("btn-bracket").classList.toggle("hidden", !tournament);
+    $("winner-text").textContent = "🎉 " + w.name + " MENANG!";
+    $("result-sub").textContent = tie
+      ? "Jawaban benar sama-sama " + w.correct + " soal, jadi pemenangnya yang menyelesaikan semua soal lebih dulu: " + w.name +
+        " (" + p[firstFinisher].name + " selesai duluan, lalu lawannya dapat waktu tambahan " + GRACE_SECONDS + " detik). Total waktu duel: " + fmtTime(elapsedSec) + "."
+      : w.name + " menang dengan jawaban benar " + w.correct + " soal berbanding " + l.correct + " soal. " +
+        p[firstFinisher].name + " yang menyelesaikan semua soal lebih dulu, lalu " + p[1 - firstFinisher].name + " dapat waktu tambahan " + GRACE_SECONDS + " detik untuk menyelesaikan sisanya. Total waktu duel: " + fmtTime(elapsedSec) + ".";
+    $("final-name1").textContent = p[0].name; $("final-name2").textContent = p[1].name;
+    $("final-prog1").textContent = p[0].correct + " benar";
+    $("final-prog2").textContent = p[1].correct + " benar";
+    $("final-stat1").textContent = "selesai " + p[0].idx + "/" + TOTAL + " soal • terlewat " + p[0].failed + " soal • salah " + p[0].mistakes + " kali";
+    $("final-stat2").textContent = "selesai " + p[1].idx + "/" + TOTAL + " soal • terlewat " + p[1].failed + " soal • salah " + p[1].mistakes + " kali";
+    var list = $("review-list"); list.innerHTML = "";
+    state.questions.forEach(function(q, i){
+      var div = document.createElement("div"); div.className = "review-item";
+      div.innerHTML = (i+1) + ". <b>" + q.text.replace(" = ?","") + " = " + fmtNum(q.answer) + "</b>";
+      list.appendChild(div);
+    });
+  }
+
+  /* ===== TURNAMEN KELAS: undian nama + bagan sistem gugur ===== */
+
+  function roundName(matchCount, isLast){
+    if(isLast) return "🏆 Final";
+    if(matchCount === 2) return "Semifinal";
+    if(matchCount === 4) return "Perempat Final";
+    return "Babak " + (matchCount * 2) + " Besar";
+  }
+
+  // Membangun bagan dari daftar nama yang sudah diacak (undi).
+  // Jumlah peserta dibulatkan ke pangkat 2 terdekat; kekurangannya jadi bye
+  // yang disebar merata (maksimal 1 bye per pertandingan, tidak pernah bye vs bye).
+  function buildTournament(names){
+    var shuffled = shuffle(names);
+    var size = 1; while(size < shuffled.length) size *= 2;
+    var pairs = size / 2;
+    var rounds = [];
+    var first = [];
+    for(var i=0;i<pairs;i++){
+      var b = (pairs + i < shuffled.length) ? shuffled[pairs + i] : null;
+      first.push({a: shuffled[i], b: b, winner: null, bye: b === null});
+    }
+    rounds.push(first);
+    var count = pairs / 2;
+    while(count >= 1){
+      var r = [];
+      for(var j=0;j<count;j++) r.push({a:null, b:null, winner:null, bye:false});
+      rounds.push(r);
+      count /= 2;
+    }
+    var t = {names: shuffled, rounds: rounds, champion: null};
+    first.forEach(function(mt, idx){ if(mt.bye){ mt.winner = mt.a; advanceWinner(t, 0, idx); } });
+    return t;
+  }
+
+  // Bagan KOSONG untuk undian penempatan: strukturnya sama persis seperti
+  // buildTournament (bye di partai-partai terakhir babak pertama), tapi semua
+  // tempatnya masih kosong. Nama siswa diundi satu per satu (putaran nama)
+  // untuk mengisi antrean tempat ini sampai semua siswa masuk bagan.
+  function buildEmptyBracket(names){
+    var size = 1; while(size < names.length) size *= 2;
+    var pairs = size / 2;
+    var rounds = [], first = [];
+    for(var i=0;i<pairs;i++){
+      first.push({a:null, b:null, winner:null, bye: (pairs + i >= names.length)});
+    }
+    rounds.push(first);
+    var count = pairs / 2;
+    while(count >= 1){
+      var r = [];
+      for(var j=0;j<count;j++) r.push({a:null, b:null, winner:null, bye:false});
+      rounds.push(r);
+      count /= 2;
+    }
+    var queue = [];
+    first.forEach(function(mt, m){
+      queue.push({m:m, slot:"a"});
+      if(!mt.bye) queue.push({m:m, slot:"b"});
+    });
+    return { names: names.slice(), rounds: rounds, champion: null,
+             drawing: { queue: queue, idx: 0, pool: names.slice() } };
+  }
+
+  function advanceWinner(t, r, m){
+    var w = t.rounds[r][m].winner;
+    if(r === t.rounds.length - 1){ t.champion = w; return; }
+    var next = t.rounds[r + 1][Math.floor(m / 2)];
+    if(m % 2 === 0) next.a = w; else next.b = w;
+  }
+
+  function findNextMatch(t){
+    if(!t || t.champion) return null;
+    if(t.drawing && t.drawing.idx < t.drawing.queue.length) return null; // undian bagan belum selesai
+    for(var r=0;r<t.rounds.length;r++){
+      for(var m=0;m<t.rounds[r].length;m++){
+        var mt = t.rounds[r][m];
+        if(mt.a && mt.b && !mt.winner) return {r:r, m:m, match:mt};
+      }
+    }
+    return null;
+  }
+
+  function parseRoster(){
+    var seen = {}, out = [];
+    $("roster").value.split(/\r?\n/).forEach(function(line){
+      var n = line.trim();
+      if(n && !seen[n]){ seen[n] = true; out.push(n); }
+    });
+    return out;
+  }
+
+  function updateRosterCount(){
+    var n = parseRoster().length;
+    $("roster-count").textContent = n ? ("Terdaftar: " + n + " siswa" + (n < 2 ? " — minimal 2 siswa untuk turnamen" : "")) : "";
+    $("roster-count").className = "tmsg" + (n && n < 2 ? " err" : "");
+  }
+
+  function updateTournamentStatus(){
+    var box = $("tournament-status");
+    if(!tournament){ box.classList.add("hidden"); return; }
+    box.classList.remove("hidden");
+    var nx = findNextMatch(tournament);
+    var drawingNow = !!(tournament.drawing && tournament.drawing.idx < tournament.drawing.queue.length);
+    $("tournament-status-text").innerHTML = tournament.champion
+      ? "🏆 <b>Turnamen selesai!</b> Juara: <b>" + tournament.champion + "</b> 🎉"
+      : drawingNow ? "🎡 <b>Undian bagan sedang berlangsung.</b> Sudah terundi " + (tournament.names.length - tournament.drawing.pool.length) + " dari " + tournament.names.length + " siswa — buka bagannya untuk melanjutkan undian."
+      : nx ? "🏆 <b>Turnamen sedang berjalan.</b> Pertandingan berikutnya: <b>" + nx.match.a + " vs " + nx.match.b + "</b> (" + roundName(tournament.rounds[nx.r].length, nx.r === tournament.rounds.length - 1) + ")."
+           : "🏆 <b>Turnamen sedang berjalan.</b>";
+  }
+
+  function playerRow(name, winnerName, placeholder){
+    var row = document.createElement("div");
+    row.className = "mrow" + (name && name === winnerName ? " win" : (!name ? " tbd" : ""));
+    var nm = document.createElement("span");
+    nm.textContent = name || placeholder;
+    row.appendChild(nm);
+    if(name && name === winnerName){
+      var tick = document.createElement("span"); tick.textContent = "🏆";
+      row.appendChild(tick);
+    }
+    return row;
+  }
+
+  function renderBracket(){
+    if(!tournament) return;
+    var modeLabel = {perkalian:"Perkalian", pembagian:"Pembagian", campuran:"Campuran"}[selectedMode];
+    var levelLabel = {mudah:"Mudah", sedang:"Sedang", sulit:"Sulit"}[selectedLevel];
+    $("bracket-sub").textContent = "Peserta: " + tournament.names.length + " siswa • Mode: " + modeLabel + " • Level: " + levelLabel + " • Sistem gugur";
+    var champ = $("champ-banner");
+    if(tournament.champion){
+      champ.textContent = "👑 JUARA TURNAMEN 👑  " + tournament.champion + "  🎉";
+      champ.classList.remove("hidden");
+    } else champ.classList.add("hidden");
+
+    var drawing = !!(tournament.drawing && tournament.drawing.idx < tournament.drawing.queue.length);
+    var panel = $("ceremony-panel");
+    if(tournament.drawing){
+      var d = tournament.drawing;
+      panel.classList.remove("hidden");
+      if(drawing){
+        var tgt = d.queue[d.idx], tm = tournament.rounds[0][tgt.m];
+        $("ceremony-label").innerHTML = "Mengundi untuk <b>Partai " + (tgt.m + 1) + "</b> (" + roundName(tournament.rounds[0].length, false) + ") — " +
+          (tm.bye ? "pemain ini <b>lolos langsung (bye)</b>" : (tgt.slot === "a" ? "<b>Pemain pertama</b>" : "<b>Pemain kedua</b> — lawannya: <b>" + tm.a + "</b>"));
+        $("ceremony-progress").textContent = "Sudah terundi: " + (tournament.names.length - d.pool.length) + " dari " + tournament.names.length + " siswa • Sisa nama yang belum diundi: " + d.pool.length;
+        $("btn-spin-slot").classList.remove("hidden");
+      } else {
+        $("ceremony-label").innerHTML = "✅ <b>Undian selesai!</b> Ini hasil undiannya — sudah jelas siapa melawan siapa. Tinggal mainkan duelnya: klik <b>▶️ Mainkan Duel Ini</b> di partai yang siap, atau tombol Pertandingan Berikutnya di bawah bagan.";
+        $("ceremony-progress").textContent = "Semua " + tournament.names.length + " siswa sudah terundi masuk bagan.";
+        $("btn-spin-slot").classList.add("hidden");
+        $("draw-stage2").textContent = "🏆 Bagan lengkap — siap dimainkan!";
+        $("draw-stage2").className = "draw-stage winner";
+      }
+    } else panel.classList.add("hidden");
+
+    function buildMatchCard(mt, r, m){
+      var card = document.createElement("div");
+      var playable = mt.a && mt.b && !mt.winner && !drawing;
+      card.className = "match" + (mt.winner ? " done" : (playable ? " playable" : ""));
+      var title = document.createElement("div"); title.className = "mtitle";
+      title.textContent = "Partai " + (m + 1);
+      card.appendChild(title);
+      var phA = (drawing && r === 0) ? "🎡 Belum diundi" : "Menunggu pemenang...";
+      var phB = mt.bye ? "— BYE —" : phA;
+      card.appendChild(playerRow(mt.a, mt.winner, phA));
+      card.appendChild(playerRow(mt.b, mt.winner, phB));
+      var st = document.createElement("div"); st.className = "mstatus";
+      st.textContent = (drawing && r === 0 && !mt.a) ? "🎡 Belum diundi"
+        : mt.bye ? "✅ Lolos langsung (bye)"
+        : mt.winner ? "Pemenang: " + mt.winner
+        : playable ? "⚔️ Siap dimainkan"
+        : (drawing && mt.a && mt.b) ? "✅ Terundi — dimainkan sesudah undian selesai"
+        : "⏳ Menunggu pemenang babak sebelumnya";
+      card.appendChild(st);
+      if(playable){
+        var btn = document.createElement("button");
+        btn.className = "mbtn"; btn.textContent = "▶️ Mainkan Duel Ini";
+        btn.addEventListener("click", function(){ startBracketMatch(r, m); });
+        card.appendChild(btn);
+      }
+      return card;
+    }
+    function buildColumn(r, matchIdxs, center){
+      var round = tournament.rounds[r];
+      var col = document.createElement("div"); col.className = "bcol" + (center ? " center" : "");
+      var h = document.createElement("h3");
+      h.textContent = center ? "🏆 FINAL" : roundName(round.length, false);
+      col.appendChild(h);
+      if(center){
+        var tr = document.createElement("div"); tr.className = "trophy-big"; tr.textContent = "🏆";
+        col.appendChild(tr);
+      }
+      var box = document.createElement("div"); box.className = "matches";
+      matchIdxs.forEach(function(m){ box.appendChild(buildMatchCard(round[m], r, m)); });
+      col.appendChild(box);
+      return col;
+    }
+
+    // Bagan dua sisi ala Piala Dunia: babak awal di tepi kiri & kanan,
+    // pemenang maju ke tengah, Final + trofi di tengah.
+    var wrap = $("bracket-wrap"); wrap.innerHTML = "";
+    var R = tournament.rounds.length, r, idxs, mm;
+    if(R === 1){
+      wrap.appendChild(buildColumn(0, [0], true));
+    } else {
+      for(r = 0; r < R - 1; r++){ // sisi kiri, dari babak paling awal menuju tengah
+        idxs = [];
+        for(mm = 0; mm < tournament.rounds[r].length / 2; mm++) idxs.push(mm);
+        wrap.appendChild(buildColumn(r, idxs, false));
+      }
+      wrap.appendChild(buildColumn(R - 1, [0], true)); // Final di tengah
+      for(r = R - 2; r >= 0; r--){ // sisi kanan, cermin sisi kiri
+        idxs = [];
+        for(mm = Math.ceil(tournament.rounds[r].length / 2); mm < tournament.rounds[r].length; mm++) idxs.push(mm);
+        wrap.appendChild(buildColumn(r, idxs, false));
+      }
+    }
+
+    var nx = findNextMatch(tournament);
+    $("btn-next-match").textContent = tournament.champion
+      ? "🏆 Turnamen Sudah Selesai"
+      : drawing ? "🎡 Selesaikan Undian Dulu untuk Mulai Bermain"
+      : nx ? "▶️ Pertandingan Berikutnya: " + nx.match.a + " vs " + nx.match.b
+           : "⏳ Menunggu Pemenang Babak Sebelumnya";
+    updateTournamentStatus();
+  }
+
+  function startBracketMatch(r, m){
+    var mt = tournament.rounds[r][m];
+    if(!mt.a || !mt.b || mt.winner) return;
+    activeMatch = {r:r, m:m};
+    $("name1").value = mt.a;
+    $("name2").value = mt.b;
+    startGame();
+  }
+
+  $("btn-start").addEventListener("click", startGame);
+  $("btn-again").addEventListener("click", startGame);
+  $("btn-home").addEventListener("click", function(){ clearInterval(elapsedId); if(graceId) clearInterval(graceId); graceId = null; show("screen-start"); });
+
+  /* ===== Handler Turnamen ===== */
+  $("roster").addEventListener("input", function(){
+    updateRosterCount();
+    updateDrawUI();
+    try{ localStorage.setItem("duel_roster", $("roster").value); }catch(e){}
+  });
+  try{
+    var savedRoster = localStorage.getItem("duel_roster");
+    if(savedRoster) $("roster").value = savedRoster;
+  }catch(e){}
+  updateRosterCount();
+
+  $("btn-create-tournament").addEventListener("click", function(){
+    var names = parseRoster();
+    var msg = $("tournament-msg");
+    if(names.length < 2){
+      msg.textContent = "⚠️ Minimal 2 nama siswa untuk membuat turnamen — sekarang baru ada " + names.length + " nama.";
+      msg.className = "tmsg err";
+      return;
+    }
+    msg.textContent = ""; msg.className = "tmsg";
+    tournament = buildEmptyBracket(names);
+    activeMatch = null;
+    renderBracket();
+    show("screen-bracket");
+  });
+
+  /* ===== Putaran Undian Nama ===== */
+  function updateDrawUI(){
+    var names = parseRoster();
+    var sisa = names.filter(function(n){ return drawnSet.indexOf(n) < 0; }).length;
+    $("draw-info").innerHTML = "🔵 Pemain 1: <b>" + (drawPicks[1] || "—") + "</b> &nbsp;•&nbsp; 🔴 Pemain 2: <b>" + (drawPicks[2] || "—") + "</b>" +
+      "<br>Sudah terpilih sesi ini: " + drawnSet.length + " dari " + names.length + " siswa (sisa " + sisa + " yang belum pernah maju).";
+    $("btn-draw-duel").classList.toggle("hidden", !(drawPicks[1] && drawPicks[2]));
+  }
+
+  function spin(slot){
+    if(spinning) return;
+    var names = parseRoster();
+    var msg = $("draw-msg");
+    if(names.length < 2){
+      msg.textContent = "⚠️ Isi dulu daftar nama siswanya (minimal 2 nama) di kotak daftar di atas.";
+      msg.className = "tmsg err";
+      return;
+    }
+    msg.textContent = ""; msg.className = "tmsg";
+    if(drawPicks[1] && drawPicks[2]){
+      // Pasangan sebelumnya sudah lengkap:
+      // - kalau duelnya sudah dimainkan, kedua nama tetap tercatat "sudah maju" (tidak bisa terpilih lagi)
+      // - kalau belum dimainkan, kedua nama dikembalikan ke daftar yang bisa terpilih
+      if(!pairConsumed){
+        drawnSet = drawnSet.filter(function(n){ return n !== drawPicks[1] && n !== drawPicks[2]; });
+      }
+      drawPicks = {1: null, 2: null};
+      pairConsumed = false;
+    } else if(drawPicks[slot]){
+      // Slot ini diundi ulang sebelum pasangannya lengkap: nama lamanya dikembalikan
+      drawnSet = drawnSet.filter(function(n){ return n !== drawPicks[slot]; });
+      drawPicks[slot] = null;
+    }
+    var other = drawPicks[slot === 1 ? 2 : 1];
+    var pool = names.filter(function(n){ return drawnSet.indexOf(n) < 0 && n !== other; });
+    if(pool.length === 0){
+      // Semua siswa sudah pernah maju -> undian mulai dari awal lagi
+      drawnSet = [];
+      pool = names.filter(function(n){ return n !== other; });
+      msg.textContent = "🔄 Semua siswa sudah pernah terpilih — daftar undian direset, semua bisa terpilih lagi.";
+      msg.className = "tmsg ok";
+    }
+    spinning = true;
+    ["btn-spin1","btn-spin2","btn-start","btn-create-tournament","btn-draw-duel","btn-draw-reset"].forEach(function(id){
+      var el = $(id); if(el){ el.disabled = true; el.style.opacity = ".6"; }
+    });
+    animateNames(pool, $("draw-stage"), function(winner){
+      drawPicks[slot] = winner;
+      drawnSet.push(winner);
+      $("name" + slot).value = winner;
+      spinning = false;
+      ["btn-spin1","btn-spin2","btn-start","btn-create-tournament","btn-draw-duel","btn-draw-reset"].forEach(function(id){
+        var el = $(id); if(el){ el.disabled = false; el.style.opacity = ""; }
+      });
+      updateDrawUI();
+    });
+  }
+
+  // Animasi putaran nama: nama-nama berganti cepat, makin lama makin lambat,
+  // lalu berhenti di satu nama pemenang undian.
+  function animateNames(pool, stage, done){
+    var winner = pool[randInt(0, pool.length - 1)];
+    stage.className = "draw-stage spinning";
+    var total = 2400 + randInt(0, 700), elapsed = 0;
+    (function tick(){
+      stage.textContent = "🎡 " + pool[randInt(0, pool.length - 1)];
+      elapsed += 40 + Math.pow(elapsed / total, 2) * 280;
+      if(elapsed < total){
+        setTimeout(tick, 40 + Math.pow(elapsed / total, 2) * 280);
+      } else {
+        stage.textContent = "🎉 " + winner;
+        stage.className = "draw-stage winner";
+        done(winner);
+      }
+    })();
+  }
+
+  /* ===== Undian Penempatan Bagan Turnamen ===== */
+  // Satu klik = satu putaran untuk satu tempat di bagan. Nama yang terundi
+  // langsung masuk bagan; kalau tempatnya partai bye, siswa itu lolos langsung.
+  function spinCeremony(){
+    if(spinning || !tournament || !tournament.drawing) return;
+    var d = tournament.drawing;
+    if(d.idx >= d.queue.length) return;
+    var target = d.queue[d.idx];
+    var mt = tournament.rounds[0][target.m];
+    spinning = true;
+    var btn = $("btn-spin-slot");
+    btn.disabled = true; btn.style.opacity = ".6";
+    animateNames(d.pool, $("draw-stage2"), function(winner){
+      d.pool = d.pool.filter(function(n){ return n !== winner; });
+      mt[target.slot] = winner;
+      if(mt.bye){ mt.winner = winner; advanceWinner(tournament, 0, target.m); }
+      d.idx++;
+      spinning = false;
+      btn.disabled = false; btn.style.opacity = "";
+      renderBracket();
+    });
+  }
+  $("btn-spin-slot").addEventListener("click", spinCeremony);
+
+  $("btn-spin1").addEventListener("click", function(){ spin(1); });
+  $("btn-spin2").addEventListener("click", function(){ spin(2); });
+  $("btn-draw-duel").addEventListener("click", function(){
+    if(drawPicks[1] && drawPicks[2]) startGame();
+  });
+  $("btn-draw-reset").addEventListener("click", function(){
+    if(spinning) return;
+    drawnSet = []; drawPicks = {1: null, 2: null}; pairConsumed = false;
+    var stage = $("draw-stage");
+    stage.textContent = "Siapa yang akan maju berduel? 🎲";
+    stage.className = "draw-stage";
+    $("draw-msg").textContent = "";
+    updateDrawUI();
+  });
+  updateDrawUI();
+
+  $("btn-next-match").addEventListener("click", function(){
+    var nx = findNextMatch(tournament);
+    if(nx) startBracketMatch(nx.r, nx.m);
+  });
+  $("btn-bracket-home").addEventListener("click", function(){ show("screen-start"); updateTournamentStatus(); });
+  $("btn-open-bracket").addEventListener("click", function(){ renderBracket(); show("screen-bracket"); });
+  $("btn-bracket").addEventListener("click", function(){ renderBracket(); show("screen-bracket"); });
+})();
+</script>
+</body>
+</html>
